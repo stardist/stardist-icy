@@ -1,0 +1,10 @@
+.idea/
+.setting/
+.settings/
+target/
+build/
+*.iml
+.classpath
+.project
+setting.xml
+workspace/

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherited Icy Parent POM -->
+    <parent>
+        <groupId>org.bioimageanalysis.icy</groupId>
+        <artifactId>parent-pom-plugin</artifactId>
+        <version>1.0.1</version>
+    </parent>
+
+    <!-- Project Information -->
+    <artifactId>stardist-icy</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+    
+    <packaging>jar</packaging>
+
+    <name>A StarDist plugin for Icy.</name>
+    <description>StarDist - Object Detection with Star-convex Shapes</description>
+    <url>https://stardist.net/</url>
+    <inceptionYear>2020</inceptionYear>
+
+    <organization>
+        <name>StarDist</name>
+        <url>https://stardist.net/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>GNU GPLv3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>frauzufall</id>
+            <name>Deborah Schmidt</name>
+            <url>http://frauzufall.de</url>
+            <roles>
+                <role>founder</role>
+                <role>lead</role>
+                <role>architect</role>
+                <role>developer</role>
+                <role>debugger</role>
+                <role>tester</role>
+                <role>maintainer</role>
+                <role>support</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <!-- Project properties -->
+    <properties>
+    </properties>
+
+    <!-- Project build configuration -->
+    <build>
+
+    </build>
+
+    <!-- List of project's dependencies -->
+    <dependencies>
+        <!-- The core of Icy -->
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-kernel</artifactId>
+        </dependency>
+
+        <!-- The EzPlug library, simplifies writing UI for Icy plugins. -->
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>ezplug</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>de.lighti</groupId>
+            <artifactId>Clipper</artifactId>
+            <version>6.4.2</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/Clipper-6.4.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-platform-mkl</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <!-- Icy Maven repository (to find parent POM) -->
+    <repositories>
+        <repository>
+            <id>icy</id>
+            <name>Icy's Nexus</name>
+            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>server-id</id>
+            <url>server's url</url>
+        </snapshotRepository>
+        <repository>
+            <id>server-id</id>
+            <url>server's url</url>
+        </repository>
+    </distributionManagement>
+</project>
