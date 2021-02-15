@@ -16,6 +16,7 @@ import plugins.adufour.ezplug.EzButton;
 import plugins.adufour.ezplug.EzGroup;
 import plugins.adufour.ezplug.EzLabel;
 import plugins.adufour.ezplug.EzPlug;
+import plugins.adufour.ezplug.EzStoppable;
 import plugins.adufour.ezplug.EzVarBoolean;
 import plugins.adufour.ezplug.EzVarDouble;
 import plugins.adufour.ezplug.EzVarEnum;
@@ -31,7 +32,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-public class StarDist2DPlugin extends EzPlug
+public class StarDist2DPlugin extends EzPlug implements EzStoppable
 {
 
 	private final String msgTitle = "<html>" +
@@ -55,6 +56,8 @@ public class StarDist2DPlugin extends EzPlug
 	private EzVarDouble percentileBottom;
 	private EzVarBoolean normalizeInput;
 	private EzVarEnum<AvailableModels.Model2D> modelChoice;
+
+	private boolean wasCanceled;
 
 	@Override
 	protected void initialize()
@@ -108,6 +111,12 @@ public class StarDist2DPlugin extends EzPlug
 	{
 		// Nothing to do
 	}
+	
+	@Override
+	public void stopExecution()
+	{
+		this.wasCanceled = true;
+	}
 
 	@Override
 	protected void execute()
@@ -115,12 +124,13 @@ public class StarDist2DPlugin extends EzPlug
 
 		// Load in a separate thread.
 		ThreadUtil.bgRun(() -> {
-			predict(input.getValue());
+			predict();
 		});
 	}
 
-	private void predict(Sequence sequence) {
-		Sequence inputSequence = input.getValue();
+	private void predict() {
+		wasCanceled = false;
+		Sequence sequence = input.getValue();
 		ModelPrediction prediction = new TensorFlowModelPrediction();
 //		if (roiPosition.equals(Opt.ROI_POSITION_AUTO))
 //			roiPositionActive = input.numDimensions() > 3 && !input.isRGBMerged() ? Opt.ROI_POSITION_HYPERSTACK : Opt.ROI_POSITION_STACK;
@@ -163,16 +173,23 @@ public class StarDist2DPlugin extends EzPlug
 //			paramsNMS.put("verbose", verbose);
 
 //			final LinkedHashSet<AxisType> inputAxes = Utils.orderedAxesSet(input);
-			final boolean isTimelapse = inputSequence.getSizeT() > 1;
+			final boolean isTimelapse = sequence.getSizeT() > 1;
 
 			// TODO: option to normalize image/timelapse channel by channel or all channels jointly
 
 			if (isTimelapse) {
 				// TODO: option to normalize timelapse frame by frame (currently) or jointly
-				final long numFrames = inputSequence.getSizeT();
+				final long numFrames = sequence.getSizeT();
 				for (int t = 0; t < numFrames; t++) {
-					Sequence predictionResult = prediction.predict(inputSequence, t);
-					Candidates polygons = nms.run(predictionResult, t);
+					if (wasCanceled)
+						break;
+					getStatus().setMessage("Processing time-point " + t + " of " + numFrames);
+					Sequence predictionResult = prediction.predict(sequence, t);
+					/*
+					 *  Because the prediction results will only have 1 time-point, we need to run
+					 *  the NMS prediction on its first time-point, the number 0.
+					 */
+					Candidates polygons = nms.run(predictionResult, 0);
 					display(sequence, polygons, t);
 					getStatus().setCompletion((float)(1+t) / (float)numFrames);
 				}
@@ -181,7 +198,7 @@ public class StarDist2DPlugin extends EzPlug
 				//       - joint normalization of all frames
 				//       - requires more memory to store intermediate results (prob and dist) of all frames
 				//       - allows showing prob and dist easily
-				Sequence predictionResult = prediction.predict(inputSequence);
+				Sequence predictionResult = prediction.predict(sequence);
 				Candidates polygons = nms.run(predictionResult, 0);
 				display(sequence, polygons, 0);
 			}
@@ -195,6 +212,7 @@ public class StarDist2DPlugin extends EzPlug
 				e.printStackTrace();
 			}
 		}
+		getStatus().done();
 	}
 
 	private void display(Sequence sequence, Candidates polygons, int time) {
@@ -232,7 +250,8 @@ public class StarDist2DPlugin extends EzPlug
 		 * Programmatically launch a plugin, as if the user had clicked its
 		 * button.
 		 */
-		String imagePath = "samples/blobs.png";
+//		String imagePath = "samples/blobs.png";
+		String imagePath = "C:/Users/tinevez/Development/TrackMateWS/TrackMate-StarDist/samples/P31-crop.tif";
 		final Sequence sequence = Loader.loadSequence( imagePath, 0, true );
 		display(sequence);
 		PluginLauncher.start( PluginLoader.getPlugin( StarDist2DPlugin.class.getName() ) );

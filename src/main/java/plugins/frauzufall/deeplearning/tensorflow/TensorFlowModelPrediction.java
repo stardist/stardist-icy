@@ -95,10 +95,16 @@ public class TensorFlowModelPrediction extends AbstractModelPrediction<Tensor> {
 	@Override
 	public Sequence predict(Sequence inputSequence, int time) {
 		Sequence normalized = normalize(inputSequence, time);
-		inputSequence.setImage(0, 0, normalized.getImage(0, 0));
-		return super.predict(normalized, time);
+		// Because the normalized sequence has only 1 time-point, we have to process its first time-point, the number 0.
+		return super.predict(normalized, 0);
 	}
 
+	/**
+	 * Normalizes the time-point of the specified sequence, and returns the results in a <b>1 time-point</b> sequence.
+	 * @param input the sequence to normalize.
+	 * @param time the time-point to normalize.
+	 * @return a new sequence, with only one time-point.
+	 */
 	private Sequence normalize(Sequence input, int time) {
 		double[] values = new double[input.getWidth() * input.getHeight()];
 		for (int x = 0; x < input.getWidth(); x++) {
@@ -115,8 +121,7 @@ public class TensorFlowModelPrediction extends AbstractModelPrediction<Tensor> {
 			valuesOut[i] = (float) ((values[i] - minVal) * factor);
 		}
 		Sequence res = new Sequence(resImg);
-		res.setDataXY(time, 0, 0, valuesOut);
+		res.setDataXY(0, 0, 0, valuesOut);
 		return res;
 	}
-
 }
